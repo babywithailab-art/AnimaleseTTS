@@ -1,6 +1,12 @@
 # AnimaleseTTS
 동물의 숲 TTS로 해보고자 animalese-typing-desktop 를 wav로 저장할 수 있게 바꾼 것입니다.
 
+📌 이 프로젝트는 Animalese Typing Desktop 프로젝트에서 
+아이디어와 일부 구현 방식을 참고했습니다.
+
+원작자: joshxviii
+원본 저장소: https://github.com/joshxviii/animalese-typing-desktop
+
 npm install
 npm run start
 
