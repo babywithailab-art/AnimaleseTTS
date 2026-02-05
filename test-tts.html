@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animalese TTS 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Animalese TTS 테스트</h1>
+
+    <div class="test-section">
+        <h2>1. 한글 자모 분해 테스트</h2>
+        <textarea id="koreanTest" rows="3">안녕하세요</textarea>
+        <button onclick="testHangul()">한글 분해 테스트</button>
+        <div id="hangulResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 혼합 문자 파싱 테스트</h2>
+        <textarea id="mixedTest" rows="3">Hi 안녕 123!</textarea>
+        <button onclick="testMixed()">혼합 파싱 테스트</button>
+        <div id="mixedResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. SRT 파싱 테스트</h2>
+        <textarea id="srtTest" rows="5">1
+00:00:01,000 --> 00:00:02,000
+안녕하세요
+
+2
+00:00:02,500 --> 00:00:04,000
+Hello World</textarea>
+        <button onclick="testSRT()">SRT 파싱 테스트</button>
+        <div id="srtResult" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 음성 시퀀스 생성 테스트</h2>
+        <textarea id="sequenceTest" rows="3">안녕</textarea>
+        <button onclick="testSequence()">시퀀스 생성 테스트</button>
+        <div id="sequenceResult" class="result" style="display:none;"></div>
+    </div>
+
+    <script src="renderer/tts-engine.cjs"></script>
+    <script>
+        // Mock AudioManager for testing
+        const mockAudioManager = {
+            play: (path, options) => {
+                console.log(`재생: ${path}`, options);
+                return { id: Date.now() };
+            },
+            release: (id) => {
+                console.log(`정지: ${id}`);
+            }
+        };
+
+        function testHangul() {
+            const text = document.getElementById('koreanTest').value;
+            const processor = new TextProcessor();
+            const jamo = processor.decomposeHangul(text);
+            const alpha = jamo.map(j => processor.mapJamoToAlpha(j));
+
+            document.getElementById('hangulResult').innerHTML = `
+                <strong>입력:</strong> ${text}<br>
+                <strong>자모 분해:</strong> ${jamo.join(', ')}<br>
+                <strong>알파벳 매핑:</strong> ${alpha.join('')}
+            `;
+            document.getElementById('hangulResult').style.display = 'block';
+        }
+
+        function testMixed() {
+            const text = document.getElementById('mixedTest').value;
+            const processor = new TextProcessor();
+            const tokens = processor.parse(text);
+
+            document.getElementById('mixedResult').innerHTML = `
+                <strong>입력:</strong> ${text}<br>
+                <strong>파싱 결과:</strong><br>
+                ${tokens.map(t => `- [${t.type}] ${t.text}`).join('<br>')}
+            `;
+            document.getElementById('mixedResult').style.display = 'block';
+        }
+
+        function testSRT() {
+            const srt = document.getElementById('srtTest').value;
+            const engine = new TTSEngine(mockAudioManager);
+            const cues = engine.parseSRT(srt);
+
+            document.getElementById('srtResult').innerHTML = `
+                <strong>파싱된 Cue 수:</strong> ${cues.length}<br>
+                <strong>결과:</strong><br>
+                ${cues.map((c, i) => `#${i+1}: [${c.startTime}ms - ${c.endTime}ms] ${c.text}`).join('<br>')}
+            `;
+            document.getElementById('srtResult').style.display = 'block';
+        }
+
+        function testSequence() {
+            const text = document.getElementById('sequenceTest').value;
+            const engine = new TTSEngine(mockAudioManager);
+            const voiceProfile = {
+                volume: 0.65,
+                pitchShift: 0,
+                variation: 0,
+                intonation: 0,
+                rate: 1.0,
+                type: 'f1'
+            };
+
+            const sequence = engine.textToAnimalese(text, voiceProfile);
+
+            document.getElementById('sequenceResult').innerHTML = `
+                <strong>입력:</strong> ${text}<br>
+                <strong>생성된 시퀀스:</strong><br>
+                ${sequence.map((s, i) => `#${i+1}: ${s.path} (${s.duration}ms)`).join('<br>')}
+                <br><strong>총 길이:</strong> ${sequence.reduce((sum, s) => sum + s.duration, 0)}ms
+            `;
+            document.getElementById('sequenceResult').style.display = 'block';
+        }
+
+        console.log('TTS 테스트 페이지 로드 완료');
+    </script>
+</body>
+</html>

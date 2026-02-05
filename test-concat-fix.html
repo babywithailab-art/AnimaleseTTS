@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFmpeg Concat 필터 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #result {
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>FFmpeg Concat 필터 수정 테스트</h1>
+
+    <div>
+        <button onclick="testTTSConversion()">TTS 변환 테스트</button>
+        <button onclick="clearResult()">결과 지우기</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        function log(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            const className = isError ? 'error' : 'success';
+            resultDiv.innerHTML += `<div class="${className}">${message}</div>`;
+            console.log(message);
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        async function testTTSConversion() {
+            log('=== TTS 변환 테스트 시작 ===');
+            log('입력: "aaaaaaaaaaa" (11개 a 문자)');
+            log('음성 타입: f1');
+            log('');
+
+            try {
+                // Electron 전역 API 사용 가능 여부 확인
+                if (!window.api) {
+                    log('⚠️ window.api가 없습니다. Electron 환경에서 실행해야 합니다.', true);
+                    log('main.js의 수정이 완료되었습니다. 앱에서 직접 테스트하세요.');
+                    return;
+                }
+
+                // 간단한 음성 시퀀스 생성
+                const sequence = [];
+                for (let i = 0; i < 11; i++) {
+                    sequence.push({
+                        path: '&.a',
+                        duration: 200,
+                        volume: 0.65,
+                        pitchShift: 0,
+                        variation: 0,
+                        intonation: 0,
+                        rate: 1.0,
+                        type: 'f1'
+                    });
+                }
+
+                log(`생성된 시퀀스 길이: ${sequence.length}`);
+                log('');
+
+                // TTS 변환 실행 (IPC를 통한 main.js 호출)
+                log('IPC 변환 요청 전송 중...');
+                const result = await window.api.convertTtsToWav(sequence, 'low', 1.0);
+
+                if (!result.success) {
+                    throw new Error(result.error || '알 수 없는 오류');
+                }
+
+                log('✅ 변환 성공!');
+                log(`데이터 크기: ${result.data.length} bytes`);
+                log(`MIME 타입: ${result.mimeType}`);
+                log('');
+                log('FFmpeg concat 필터 수정 완료!');
+                log('입력 스트림이 올바르게 매핑되어 오류가 발생하지 않습니다.');
+
+            } catch (error) {
+                log(`❌ 오류 발생: ${error.message}`, true);
+                log(`Stack: ${error.stack}`, true);
+            }
+        }
+
+        // 페이지 로드 시 정보 표시
+        window.addEventListener('load', () => {
+            log('=== FFmpeg Concat 필터 수정 테스트 페이지 ===');
+            log(`Electron API 사용 가능: ${window.api ? '예' : '아니오'}`);
+            log(`사용자 에이전트: ${navigator.userAgent}`);
+            log('');
+            log('테스트를 실행하려면 위의 버튼을 클릭하세요.');
+        });
+    </script>
+</body>
+</html>

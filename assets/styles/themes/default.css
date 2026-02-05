@@ -1,0 +1,14 @@
+:root {
+    --drop-shadow-color: #c9a77c;
+    --main-bg-color: #f5edd8;
+    --main-text-color: #6e5c44;
+    --secondary-bg-color: #f0e6d0;
+    --accent-color: #d4a373;
+    --input-bg-color: #fffaf0;
+    --input-accent-color: #c9a77c;
+    --input-alt-color: #f8f2d7;
+    --input-highlight-color: #7ee988;
+    --input-highlight-color-2: #00ccff;
+    --input-highlight-color-3: #ff4343;
+    --input-highlight-text-color: #ffffff;
+}

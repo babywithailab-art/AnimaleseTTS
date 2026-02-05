@@ -1,0 +1,24 @@
+Animalese TTS
+by Babywith_A.I-Lab
+
+🔧 기능:
+- 텍스트를 애니멀리즈 음성으로 변환
+- SRT 파일 지원
+- 음성 프로필 조정 (피치, 변조, 음조)
+- 자동 저장 기능
+
+📄 저작권 및 라이선스:
+- 메인 라이선스: MIT License (LICENSE 파일 참조)
+- Third-party 라이선스: THIRD-PARTY-LICENSES.md 파일 참조
+- FFmpeg: LGPL v2.1+ (번들링됨, resources/ffmpeg/)
+- 설정 창에서 "Third-Party Licenses" 클릭 시 라이선스 정보 표시
+
+
+📌 이 프로젝트는 Animalese Typing Desktop 프로젝트에서 
+아이디어와 일부 구현 방식을 참고했습니다.
+
+원작자: joshxviii
+원본 저장소: https://github.com/joshxviii/animalese-typing-desktop
+
+해당 프로젝트는 MIT 라이선스를 따르며,
+자세한 내용은 원본 저장소를 참조해주세요.

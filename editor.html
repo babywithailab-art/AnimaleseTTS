@@ -1,0 +1,571 @@
+<!--
+author: joshxviii
+ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title>Animalese TTS</title>
+    <link rel="stylesheet" href="assets\styles\main.css">
+    <link rel="stylesheet" href="assets\styles\keyboard.css">
+    <link id="theme-style" rel="stylesheet" href="assets\styles\themes\default.css" />
+</head>
+<body>
+    <div id="resize-border"></div>
+    <div class="title-bar">
+        <div style="display: flex; gap: 10px;">
+            <div id="title" title="Animalese TTS">animalese tts</div>
+            <div id="disabled_warning" translation="warning.enabled"></div>
+        </div>
+
+        <div style="display: flex; padding: 0px 16px; gap: 16px;">
+            <svg-button onclick="console.log('Settings button clicked'); openSettings()" icon="config" title="Settings"></svg-button>
+            <svg-button onclick="window.api.minimizeWindow()" icon="minimize" title="Minimize"></svg-button>
+            <svg-button onclick="window.api.closeWindow()" icon="close" title="Close"></svg-button>
+        </div>
+    </div>
+
+    <div id="focus_out" show="false">
+    <div id="settings_overlay">
+        <div class="settings_header">
+            <h2 id="settings_title" translation="settings"></h2>
+            <button onclick="openSettings()" class="close_button">✕</button>
+        </div>
+        <div class="separator"></div>
+
+        <div class="catagory">
+            <h3 translation="settings.lang"></h3>
+            <select id="lang_select" onchange="updateLanguage(`${this.value}`)">
+                <option value="en" translation="en"></option>
+                <option value="es" translation="es"></option>
+                <option value="de" translation="de"></option>
+                <option value="fr" translation="fr"></option>
+                <option value="ko" translation="ko"></option>
+                <option value="ja" translation="ja"></option>
+                <option value="zh_CN" translation="zh_CN"></option>
+            </select>
+        </div>
+
+        <div class="catagory">
+            <h3 translation="settings.theme"></h3>
+            <select id="theme_select" onchange="updateTheme(`${this.value}`)">
+                <option value="default" translation="settings.theme.default"></option>
+                <option value="dark" translation="settings.theme.dark"></option>
+                <option value="pink" translation="settings.theme.pink"></option>
+                <option value="green" translation="settings.theme.green"></option>
+            </select>
+        </div>
+
+        <div class="separator"></div>
+        <div class="footer">
+            <p onclick="window.api.goToUrl('https:\/\/github.com/joshxviii/animalese-typing-desktop')" style="cursor: pointer;">
+                Animalese TTS <text id="version"></text>
+            </p>
+            <p style="font-size: 11px; opacity: 0.7; margin-top: 5px;">
+                Licensed under MIT | <a href="#" onclick="showLicenses()" style="color: inherit;">Third-Party Licenses</a>
+            </p>
+        </div>
+    </div>
+    </div>
+
+    <div id="main-win">
+        <div id="main_content">
+            <!-- 상단 섹션 -->
+            <div id="top_section">
+                <!-- 통합된 텍스트 입력 및 SRT 패널 -->
+                <div id="text_input_panel">
+                    <!-- 메인 텍스트 입력 영역 -->
+                    <textarea id="tts_input" placeholder="여기에 텍스트를 입력하세요..."></textarea>
+
+                    <!-- 하단 버튼 그룹 -->
+                    <div class="button_group">
+                        <button onclick="togglePreview()" class="action_button" id="preview_button">
+                            <span class="button_icon" id="preview_icon">▶</span>
+                        </button>
+                        <button onclick="convertTextToWav()" class="action_button">
+                            <span class="button_icon">⬇</span>
+                        </button>
+                        <button onclick="clearTTSInput()" class="action_button secondary">
+                            <span class="button_icon">↺</span>
+                        </button>
+                        <!-- SRT 파일 선택 버튼 (숨김) -->
+                        <button onclick="loadSRTFile()" class="action_button srt_button" style="display: none;">
+                            <span class="button_icon">📁</span>
+                        </button>
+                        <!-- SFX 버튼 -->
+                        <button onclick="toggleSFX()" id="sfx_button" class="action_button sfx_button" pressed="false">
+                            SFX
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 섹션 -->
+            <div id="bottom_section">
+                <div id="voice_profile_editor">
+                    <!-- 마스터 볼륨 컨트롤 (숨김) -->
+                    <div id="master_volume_control" style="display: none;">
+                        <label class="editor_label">
+                            <span translation="settings.master_volume">마스터 볼륨</span>
+                            <input id="master" class="editor_slider" type="range" min="0" max="100" step="1" value="50"></input>
+                            <input type="text" id="master_value" class="editor_output" value="50%" />
+                        </label>
+                    </div>
+
+                    <div id="sliders">
+                        <label class="editor_label">
+                            <span translation="voice.pitch">피치</span>
+                            <input id="voice_pitch" class="editor_slider" type="range" min="-12" max="12" step="0.1" value="0" defaultValue="0"></input>
+                            <input type="text" id="voice_pitch_out" class="editor_output" />
+                        </label>
+
+                        <label id="label_editor_2" class="editor_label">
+                            <span translation="voice.intonation"></span>
+                            <input id="voice_intonation" class="editor_slider" type="range" min="-1" max="1" step="0.01" value="0" defaultValue="0"></input>
+                            <input type="text" id="voice_intonation_out" class="editor_output" />
+                        </label>
+
+                        <label id="label_editor_3" class="editor_label">
+                            <span translation="voice.variation"></span>
+                            <input id="voice_variation" class="editor_slider" type="range" min="0" max="12" step="0.1" value="0" defaultValue="0"></input>
+                            <input type="text" id="voice_variation_out" class="editor_output" />
+                        </label>
+                    </div>
+
+                    <div id="voice_type_group">
+                        <div id="voice_type_buttons">
+                            <svg-button id="male" icon="male" onclick="selectVoiceType('male')" pressed="false"></svg-button>
+                            <svg-button id="female" icon="female" onclick="selectVoiceType('female')" pressed="true"></svg-button>
+                        </div>
+
+                        <select id="voice_type" class="female" tabindex="-1">
+                            <option id="label_f1" class="female" value="f1" translation="f1" selected></option>
+                            <option id="label_f2" class="female" value="f2" translation="f2"></option>
+                            <option id="label_f3" class="female" value="f3" translation="f3"></option>
+                            <option id="label_f4" class="female" value="f4" translation="f4"></option>
+                            <option id="label_m1" class="male" value="m1" translation="m1"></option>
+                            <option id="label_m2" class="male" value="m2" translation="m2"></option>
+                            <option id="label_m3" class="male" value="m3" translation="m3"></option>
+                            <option id="label_m4" class="male" value="m4" translation="m4"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="./app.asar.unpacked/assets/jquery.js"></script>
+    <script src="./renderer/animalese.cjs"></script>
+    <script src="./renderer/editor.cjs"></script>
+
+    <!-- TTS Engine Script -->
+    <script src="./renderer/tts-engine.cjs"></script>
+    <script src="./renderer/tts-ui.cjs"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded - calling initControls from renderer/editor.cjs');
+            // renderer/editor.cjs의 initControls 호출
+            if (typeof initControls === 'function') {
+                initControls();
+            } else {
+                console.error('initControls function not found in global scope');
+            }
+            updatedFocusedWindows();
+
+            // TTS 라벨 텍스트 숨기기 (translation="tts.xxx" 요소들의 텍스트만 제거)
+            hideTTSLabels();
+
+            // 번역 텍스트 위치 확인
+            console.log('=== 번역 시스템 확인 ===');
+            const pitchLabel = document.querySelector('label[translation="voice.pitch"]');
+            console.log('Pitch label element:', pitchLabel);
+            if (pitchLabel) {
+                console.log('Pitch label children:', pitchLabel.children);
+                console.log('Pitch label span:', pitchLabel.querySelector('span'));
+                console.log('Pitch label span content:', pitchLabel.querySelector('span')?.textContent);
+                console.log('Pitch label translation attr:', pitchLabel.getAttribute('translation'));
+                console.log('Pitch label textContent:', pitchLabel.textContent);
+            }
+            console.log('=== 번역 시스템 확인 완료 ===');
+
+            // 1초 후 다시 확인 (번역 시스템 로드 후)
+            setTimeout(() => {
+                console.log('=== 번역 후 상태 확인 ===');
+                if (pitchLabel) {
+                    console.log('Pitch label textContent after translation:', pitchLabel.textContent);
+                    console.log('Pitch label span content after translation:', pitchLabel.querySelector('span')?.textContent);
+                }
+                console.log('=== 번역 후 상태 확인 완료 ===');
+            }, 1000);
+
+            // TTS 초기화
+            const initTTSWhenReady = setInterval(() => {
+                if (window.audio && window.TTSEngine && !window.ttsInitialized) {
+                    console.log('TTS 초기화 시도...');
+                    initTTS(window.audio);
+                    loadVoiceProfiles();
+                    window.ttsInitialized = true;
+                    clearInterval(initTTSWhenReady);
+                }
+            }, 100);
+
+            // settings 닫기
+            const focusOut = document.getElementById('focus_out');
+            const settingsOverlay = document.getElementById('settings_overlay');
+            focusOut.addEventListener('mousedown', function(event) {
+                if (focusOut.getAttribute('show') === 'true' && !settingsOverlay.contains(event.target)) {
+                    focusOut.setAttribute('show', 'false');
+                }
+            });
+        });
+
+        function initControls() {
+            console.log('initControls() called');
+            console.log("Initializing controls...");
+
+            // Master volume
+            const master = document.getElementById('master');
+            const masterValue = document.getElementById('master_value');
+            console.log('Master element:', master);
+            console.log('MasterValue element:', masterValue);
+
+            if (master) {
+                console.log('Setting master volume slider...');
+                // Ensure value is always 0-100
+                const savedVolume = preferences.get('volume');
+                const initialValue = savedVolume !== undefined && savedVolume !== null
+                    ? Math.min(100, Math.max(0, Math.floor(savedVolume * 100)))
+                    : 50;
+                master.value = initialValue;
+                if (masterValue) {
+                    masterValue.textContent = `${master.value}%`;
+                }
+
+                // 마스터 볼륨 슬라이더 이벤트 리스너 추가
+                master.addEventListener('input', (e) => {
+                    const volume = e.target.value / 100; // 0-100을 0-1로 변환
+                    console.log('Master volume slider changed:', volume);
+
+                    // preferences에 저장
+                    preferences.set('volume', volume);
+
+                    // audioManager에 직접 설정 (IPC 경유 없이 즉시 반영)
+                    if (window.audio && window.audio.setMasterVolume) {
+                        window.audio.setMasterVolume(volume);
+                        console.log('Audio manager volume updated');
+                    }
+
+                    if (masterValue) {
+                        masterValue.textContent = `${e.target.value}%`;
+                    }
+                });
+
+                console.log('Master volume event listener added');
+            } else {
+                console.error('Master element not found!');
+            }
+
+            // Voice profile controls
+            initVoiceControls();
+        }
+
+        function initVoiceControls() {
+            // Voice pitch
+            const voicePitch = document.getElementById('voice_pitch');
+            const voicePitchOut = document.getElementById('voice_pitch_out');
+            if (voicePitch && voicePitchOut) {
+                voicePitchOut.value = voicePitch.value;
+                voicePitch.addEventListener('input', (e) => {
+                    voicePitchOut.value = e.target.value;
+                    preferences.set('voice_profile.pitch', parseFloat(e.target.value));
+                });
+            }
+
+            // Voice intonation
+            const voiceIntonation = document.getElementById('voice_intonation');
+            const voiceIntonationOut = document.getElementById('voice_intonation_out');
+            if (voiceIntonation && voiceIntonationOut) {
+                voiceIntonationOut.value = voiceIntonation.value;
+                voiceIntonation.addEventListener('input', (e) => {
+                    voiceIntonationOut.value = e.target.value;
+                    preferences.set('voice_profile.intonation', parseFloat(e.target.value));
+                });
+            }
+
+            // Voice variation
+            const voiceVariation = document.getElementById('voice_variation');
+            const voiceVariationOut = document.getElementById('voice_variation_out');
+            if (voiceVariation && voiceVariationOut) {
+                voiceVariationOut.value = voiceVariation.value;
+                voiceVariation.addEventListener('input', (e) => {
+                    voiceVariationOut.value = e.target.value;
+                    preferences.set('voice_profile.variation', parseFloat(e.target.value));
+                });
+            }
+
+            // Voice type
+            const voiceType = document.getElementById('voice_type');
+            if (voiceType) {
+                voiceType.addEventListener('change', (e) => {
+                    console.log('Voice type changed to:', e.target.value);
+                    preferences.set('voice_profile.type', e.target.value);
+                    updateVoiceTypeButtons(e.target.value);
+                });
+            }
+        }
+
+        function updateVoiceTypeButtons(selectedType) {
+            const maleButton = document.getElementById('male');
+            const femaleButton = document.getElementById('female');
+            const voiceTypeSelect = document.getElementById('voice_type');
+
+            if (maleButton && femaleButton && voiceTypeSelect) {
+                const isMale = selectedType.startsWith('m');
+                voiceTypeSelect.className = isMale ? 'male' : 'female';
+
+                document.querySelectorAll('option').forEach(option => {
+                    if (option.className === 'male') {
+                        option.style.display = isMale ? 'block' : 'none';
+                    } else if (option.className === 'female') {
+                        option.style.display = isMale ? 'none' : 'block';
+                    }
+                });
+            }
+        }
+
+        function updatedFocusedWindows() {
+            // Stub function for compatibility
+        }
+
+        function toggleSFX() {
+            const sfxButton = document.getElementById('sfx_button');
+            const currentState = sfxButton.getAttribute('pressed');
+            const newState = currentState === 'true' ? 'false' : 'true';
+            sfxButton.setAttribute('pressed', newState);
+            console.log('SFX button toggled:', newState);
+        }
+
+        // 전역 스코프에 바인딩
+        window.toggleSFX = toggleSFX;
+
+        // 미리듣기 토글 함수
+        function togglePreview() {
+            if (window.previewAudio) {
+                console.log('미리듣기 멈춤');
+                window.previewAudio.pause();
+                window.previewAudio = null;
+                updatePreviewButtonState(false);
+            } else {
+                console.log('미리듣기 시작');
+                previewTTS();
+            }
+        }
+
+        // 멈춤 함수 (호환성을 위해 유지)
+        function stopPreview() {
+            if (window.previewAudio) {
+                console.log('미리듣기 멈춤');
+                const url = window.previewAudio.previewUrl;
+                window.previewAudio.pause();
+                window.previewAudio.currentTime = 0;
+                window.previewAudio = null;
+                if (url && url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+                updatePreviewButtonState(false);
+            }
+        }
+
+        // 미리듣기 버튼 상태 업데이트
+        function updatePreviewButtonState(isPlaying) {
+            const previewButton = document.getElementById('preview_button');
+            const previewIcon = document.getElementById('preview_icon');
+            if (previewButton && previewIcon) {
+                previewIcon.textContent = isPlaying ? '⏸' : '▶';
+            }
+        }
+
+        // 전역으로 등록
+        window.stopPreview = stopPreview;
+        window.togglePreview = togglePreview;
+
+        // SRT 메시지 수신 전역 함수
+        window.receiveSRTMessage = function(data) {
+            console.log('SRT message received in main window:', data);
+
+            if (data.type === 'srt-cues-selected') {
+                console.log('SRT cues selected:', data.cues.length, 'cues');
+            } else if (data.type === 'srt-cues-convert') {
+                console.log('Converting selected SRT cues:', data.cues.length, 'cues');
+                if (typeof convertCueListToWav === 'function') {
+                    convertCueListToWav(data.cues);
+                }
+            } else if (data.type === 'srt-cues-convert-all') {
+                console.log('Converting all SRT cues:', data.cues.length, 'cues');
+                if (typeof convertCueListToWav === 'function') {
+                    convertCueListToWav(data.cues);
+                }
+            } else if (data.type === 'srt-convert-all') {
+                console.log('Converting entire SRT to single WAV file');
+                if (typeof convertAllSRT === 'function') {
+                    convertAllSRT();
+                } else {
+                    console.error('convertAllSRT function not found');
+                }
+            }
+        };
+
+        // SRT 창 메시지 리스너 추가
+        window.addEventListener('message', (event) => {
+            console.log('Message from SRT window:', event.data);
+
+            if (event.data.type === 'srt-cues-selected') {
+                // 선택된 cues 처리
+                console.log('SRT cues selected:', event.data.cues.length, 'cues');
+                // TODO: 선택된 cues로 추가 처리
+            } else if (event.data.type === 'srt-cues-convert') {
+                // 선택된 cues 변환
+                console.log('Converting selected SRT cues:', event.data.cues.length, 'cues');
+                if (typeof convertCueListToWav === 'function') {
+                    convertCueListToWav(event.data.cues);
+                }
+            } else if (event.data.type === 'srt-cues-convert-all') {
+                // 전체 cues 변환
+                console.log('Converting all SRT cues:', event.data.cues.length, 'cues');
+                if (typeof convertCueListToWav === 'function') {
+                    convertCueListToWav(event.data.cues);
+                }
+            } else if (event.data.type === 'srt-convert-all') {
+                // 전체 SRT를 하나의 WAV 파일로 변환
+                console.log('Converting entire SRT to single WAV file');
+                if (typeof convertAllSRT === 'function') {
+                    convertAllSRT();
+                } else {
+                    console.error('convertAllSRT function not found');
+                }
+            }
+        });
+
+        // Electron IPC를 통한 SRT 메시지 수신
+        if (window.api && window.api.onSRTMessage) {
+            window.api.onSRTMessage((data) => {
+                console.log('SRT message received via IPC:', data);
+
+                if (data.type === 'srt-cues-selected') {
+                    console.log('SRT cues selected:', data.cues.length, 'cues');
+                } else if (data.type === 'srt-cues-convert') {
+                    console.log('Converting selected SRT cues:', data.cues.length, 'cues');
+                    if (typeof convertCueListToWav === 'function') {
+                        convertCueListToWav(data.cues);
+                    }
+                } else if (data.type === 'srt-cues-convert-all') {
+                    console.log('Converting all SRT cues:', data.cues.length, 'cues');
+                    if (typeof convertCueListToWav === 'function') {
+                        convertCueListToWav(data.cues);
+                    }
+                } else if (data.type === 'srt-convert-all') {
+                    console.log('Converting entire SRT to single WAV file');
+                    if (typeof convertAllSRT === 'function') {
+                        convertAllSRT();
+                    } else {
+                        console.error('convertAllSRT function not found');
+                    }
+                }
+            });
+        }
+
+        function openSettings() {
+            console.log('=== openSettings() called ===');
+            const focusOut = document.getElementById('focus_out');
+            const isShown = focusOut.getAttribute('show') === 'true';
+            console.log('Current show attribute:', focusOut.getAttribute('show'));
+            console.log('Current state:', isShown ? 'shown' : 'hidden');
+
+            const newState = isShown ? 'false' : 'true';
+            console.log('Setting to:', newState);
+
+            focusOut.setAttribute('show', newState);
+
+            // 즉시 확인
+            console.log('After toggle - show attribute:', focusOut.getAttribute('show'));
+            console.log('After toggle - computed visibility:', window.getComputedStyle(focusOut).visibility);
+            console.log('After toggle - computed opacity:', window.getComputedStyle(focusOut).opacity);
+            console.log('After toggle - computed zIndex:', window.getComputedStyle(focusOut).zIndex);
+            console.log('=== openSettings() done ===');
+        }
+
+        // 전역 스코프에 명시적으로 바인딩
+        window.openSettings = openSettings;
+
+        function showLicenses() {
+            const licensesText =
+`Third-Party Licenses
+
+This software uses the following third-party libraries:
+
+• Electron (MIT) - https://github.com/electron/electron
+• FFmpeg (LGPL v2.1+) - https://ffmpeg.org/
+• howler.js (MIT) - https://github.com/goldfire/howler.js
+• electron-store (MIT) - https://github.com/sindresorhus/electron-store
+• electron-builder (MIT) - https://github.com/electron-userland/electron-builder
+
+FFmpeg License Compliance:
+This application uses FFmpeg in accordance with LGPL v2.1+ license.
+FFmpeg is bundled with this application for user convenience.
+FFmpeg is dynamically linked and located at resources/ffmpeg/ffmpeg.exe.
+Users may replace FFmpeg with their own LGPL-compliant version.
+
+For complete license information, see:
+• LICENSE (Main project license)
+• THIRD-PARTY-LICENSES.md (Detailed third-party licenses)
+• FFMPEG_SETUP.md (FFmpeg setup guide)
+
+© 2025 joshxviii
+Released under MIT License
+`;
+            alert(licensesText);
+        }
+        window.showLicenses = showLicenses;
+
+        function saveVoiceProfile() {
+            console.log('Save voice profile');
+        }
+
+        function deleteVoiceProfile() {
+            console.log('Delete voice profile');
+        }
+
+        function loadVoiceProfile() {
+            console.log('Load voice profile');
+        }
+
+        /**
+         * TTS 라벨 텍스트 숨기기
+         * translation="tts.xxx" 속성을 가진 요소들의 텍스트를 제거
+         */
+        function hideTTSLabels() {
+            // "tts." 접두어가 붙은 translation 속성을 가진 모든 요소 찾기
+            const ttsElements = document.querySelectorAll('[translation^="tts."]');
+
+            ttsElements.forEach(element => {
+                // 요소의 텍스트만 제거 (translation 속성은 유지)
+                element.textContent = '';
+
+                // CSS로 visibility hidden 제거 (JavaScript로 제어)
+                element.style.visibility = '';
+                element.style.fontSize = '';
+                element.style.lineHeight = '';
+                element.style.height = '';
+                element.style.margin = '';
+                element.style.padding = '';
+                element.style.overflow = '';
+            });
+
+            console.log(`TTS 라벨 ${ttsElements.length}개 숨김 처리됨`);
+        }
+    </script>
+</body>
+</html>

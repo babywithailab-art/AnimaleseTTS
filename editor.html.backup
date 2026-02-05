@@ -1,0 +1,343 @@
+ <!--
+author: joshxviii 
+ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+    <title>Animalese Typing</title>
+    <link rel="stylesheet" href="assets\styles\main.css">
+    <link rel="stylesheet" href="assets\styles\keyboard.css">
+    <link id="theme-style" rel="stylesheet" href="assets\styles\themes\default.css" />
+</head>
+<body>
+    <div id="resize-border"></div>
+    <div class="title-bar">
+        <div style="display: flex; gap: 10px;">
+            <!-- <img id="icon" src="assets\images\icon.png" alt="Animalese Typing - Desktop" title="Animalese Typing - Desktop" style="height: 20px;"></img> -->
+            <div id="title" title="Animalese Typing - Desktop">animalese typing</div>
+            <!-- Get hot key from settings -->
+            <div id="disabled_warning" translation="warning.enabled"></div>
+        </div>
+
+        <div style="display: flex; padding: 0px 16px; gap: 16px;">
+            <svg-button onclick="openSettings()" icon="config" title="Settings"></svg-button>
+            <svg-button onclick="window.api.minimizeWindow()" icon="minimize" title="Minimize"></svg-button>
+            <svg-button onclick="window.api.closeWindow()" icon="close" title="Close"></svg-button>
+        </div>
+    </div>
+
+    <div id="focus_out" show="false">
+    <div id="settings_overlay">
+        <h2 id="settings_title" translation="settings"></h2>
+
+        <div class="separator"></div>
+        
+        <div class="catagory">
+            <h3 translation="settings.lang"></h3>
+            <select id="lang_select" onchange="updateLanguage(`${this.value}`)">
+                <option value="en"      translation="en"></option>
+                <option value="es"      translation="es"></option>
+                <option value="de"      translation="de"></option>
+                <option value="fr"      translation="fr"></option>
+                <option value="ko"      translation="ko"></option>
+                <option value="ja"      translation="ja"></option>
+                <option value="zh_CN"   translation="zh_CN"></option>
+            </select>
+        </div>
+
+        <div class="catagory">
+            <h3 translation="settings.theme"></h3>
+            <select id="theme_select" onchange="updateTheme(`${this.value}`)">
+                <option value="default" translation="settings.theme.default"></option>
+                <option value="dark"    translation="settings.theme.dark"></option>
+                <option value="pink"    translation="settings.theme.pink"></option>
+                <option value="green"   translation="settings.theme.green"></option>
+            </select>
+        </div>
+
+        <div class="catagory">
+            <h3 translation="settings.apps"></h3>
+            <label translation="settings.always_active">
+                <input type="checkbox" id="check_always_active" onchange="window.settings.set('always_active', this.checked);document.querySelectorAll('#apps_table, #apps_toggle').forEach(el => el.setAttribute('disabled', this.checked))"/>
+            </label>
+
+            <label id="apps_toggle" translation="settings.apps.mode" disabled="false">
+                <label class="toggle">
+                    <input type="checkbox" id="check_selected_active" onchange="window.settings.set('selected_active', this.checked);document.querySelectorAll(`[translation='settings.apps.active'], [translation='settings.apps.inactive']`).forEach(el => el.setAttribute('translation', this.checked?'settings.apps.active':'settings.apps.inactive'));document.getElementById('apps_tbody').setAttribute('inactive', !this.checked);"/>
+                    <span class="slider"></span>
+                </label>
+            </label>
+
+            <table id="apps_table" disabled="false">
+                <thead style="justify-items: center;">
+                    <tr>
+                        <th id="apps_description" style="font-size: 10px; opacity: .7;">
+                            <span translation="settings.apps.active"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="apps_tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="catagory">
+            <h3 translation="settings.general"></h3>
+
+            <label translation="settings.startup">
+                <input type="checkbox" id="check_startup_run" onchange="window.settings.set('startup_run', this.checked)"/>
+            </label>
+
+            <label translation="settings.hold_repeat">
+                <input type="checkbox" id="check_hold_repeat" onchange="window.settings.set('hold_repeat', this.checked)"/>
+            </label>
+
+            <div class="rad_button_list">
+                <p translation="settings.audio_mode"></p>
+
+                <label translation="settings.audio_mode.1">
+                    <input type="radio" id="config_1" name="audio_mode" value="0" checked>
+                </label>
+
+                <label translation="settings.audio_mode.2">
+                    <input type="radio" id="config_2" name="audio_mode" value="1">
+                </label>
+
+                <label translation="settings.audio_mode.3">
+                    <input type="radio" id="config_3" name="audio_mode" value="2">
+                </label>
+
+                <label translation="settings.audio_mode.4">
+                    <input type="radio" id="config_4" name="audio_mode" value="3">
+                </label>
+            </div>
+        </div>
+
+        <div class="catagory">
+            <br/>
+            <p translation="settings.reset.description"></p>
+            <button id="reset_settings" type="button"><span translation="settings.reset"></span></button>
+        </div>
+
+        <div class="separator"></div>
+        <div class="footer" title="GitHub" style="cursor: pointer;">
+            <p onclick="window.api.goToUrl('https:\/\/github.com/joshxviii/animalese-typing-desktop')">
+                Animalese Typing <text id="version"></text>
+            </p>
+        </div>
+    </div>
+    </div>
+
+    <div id="main-win">
+
+        <div id="main_content">
+
+            <div id="top_row">
+                <div id="remap_controllers">
+                    <key-board layout-type="special" class="remap_controller" show="false"></key-board>
+                    <!-- TTS UI -->
+                    <div id="tts_ui_container" class="remap_controller" show="true">
+                        <!-- 입력 영역 -->
+                        <div style="padding: 10px;">
+                            <textarea id="tts_input" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;" placeholder="변환할 텍스트를 입력하세요..."></textarea>
+                        </div>
+
+                        <!-- SRT 파일 업로드 -->
+                        <div style="padding: 10px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">SRT 파일</label>
+                            <input type="file" id="srt_file" accept=".srt" style="margin-bottom: 8px;" />
+                            <button onclick="loadSRTFile()" style="padding: 6px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">SRT 로드</button>
+                            <button onclick="clearTTSInput()" style="padding: 6px 12px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">초기화</button>
+                        </div>
+
+                        <!-- SRT 미리보기 -->
+                        <div id="srt_preview" style="display: none; padding: 10px;">
+                            <h4 style="margin: 0 0 10px 0; font-size: 14px;">SRT 미리보기</h4>
+                            <div id="srt_cues_list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 5px;"></div>
+                        </div>
+
+                        <!-- 액션 버튼 -->
+                        <div style="padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button onclick="previewTTS()" style="padding: 8px 16px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">미리듣기</button>
+                            <button onclick="convertTextToWav()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">텍스트 → WAV</button>
+                            <button onclick="convertSelectedCue()" style="padding: 8px 16px; background: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer;">선택 Cue → WAV</button>
+                            <button onclick="convertAllSRT()" style="padding: 8px 16px; background: #9C27B0; color: white; border: none; border-radius: 4px; cursor: pointer;">전체 SRT → WAV</button>
+                        </div>
+
+                        <!-- 진행률 -->
+                        <div id="tts_progress" style="display: none; padding: 10px;">
+                            <progress id="tts_progress_bar" value="0" max="100" style="width: 100%; height: 20px;"></progress>
+                            <span id="tts_progress_text" style="display: block; margin-top: 5px; text-align: center; font-size: 12px; color: #666;"></span>
+                        </div>
+                    </div>
+                    <piano-board class="remap_controller" show="false"></piano-board>
+                    <key-board layout-type="sfx" class="remap_controller" show="false"></key-board>
+                </div>
+
+                <div style="width: 100%; margin: 0px 8px 0px 0px;">
+                    <div id="key_remapper">
+                        <div style="width: 100%;">
+                            <h3 translation="remapper" style="margin-block: 6px 16px;"></h3>
+                            <input id="remap_in" type="text" maxlength="1" onclick="this.focus()" translation="remap" tabindex="-1"/>
+                            <label id="remap_monitor" for="remap_in" translation="remap" class="highlighted"></label>
+                            <div class="button_row">
+                                <svg-button id="remap_accept" onclick="remapStop()" onmousedown="window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 })" icon="accept" title="Accept" disabled="true"></svg-button>
+                                <svg-button id="remap_reset" onclick="remapReset()" onmousedown="window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 })" icon="reset" title="Reset" disabled="true"></svg-button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div id="remap_tabs">
+                        <svg-button class="remap_tab" onmousedown="changeTab(0);window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 });" icon="config" title="Special Functions" pressed="false"></svg-button>
+                        <svg-button class="remap_tab" onmousedown="changeTab(1);window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 });" icon="speech" title="Speech" pressed="true"></svg-button>
+                        <svg-button class="remap_tab" onmousedown="changeTab(2);window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 });" icon="note" title="Instruments" pressed="false"></svg-button>
+                        <svg-button class="remap_tab" onmousedown="changeTab(3);window.audio.play('sfx.default', { static: true, channel: 2, volume: 0.55 });" icon="sfx" title="Sound Effects" pressed="false"></svg-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <div id="bottom_row">
+                <!-- NONE -->
+                <div class="audio_editor" show="false"></div>
+                <!-- VOICE -->
+                <div class="audio_editor" id="voice_profile_editor" show="true">
+                    <div id="sliders">
+                        <label class="editor_label" translation="voice.pitch">
+                            <input id="voice_pitch" class="editor_slider" type="range" min="-12" max="12" step="0.1" value="0" defaultValue="0"></input>
+                            <input type="text" id="voice_pitch_out" class="editor_output" />
+                        </label>
+
+                        <label id="label_editor_2" class="editor_label" translation="voice.intonation">
+                            <input id="voice_intonation" class="editor_slider" type="range" min="-1" max="1" step="0.01" value="0" defaultValue="0"></input>
+                            <input type="text" id="voice_intonation_out" class="editor_output" />
+                        </label>
+                    
+                        <label id="label_editor_3" class="editor_label" translation="voice.variation">
+                            <input id="voice_variation" class="editor_slider" type="range" min="0" max="12" step="0.1" value="0" defaultValue="0.5"></input>
+                            <input type="text" id="voice_variation_out" class="editor_output" />
+                        </label>
+                    </div>
+
+                    <div id="voice_type_group">
+                        <div id="voice_type_buttons" style="display: flex;">
+                            <svg-button id="male" icon="male" onclick="selectVoiceType('male')"></svg-button>
+                            <svg-button id="female" icon="female" onclick="selectVoiceType('female')"></svg-button>
+                        </div>
+
+                        <select id="voice_type" class="female" tabindex="-1">
+                            <option id="label_f1" class="female" value="f1" translation="f1" selected></option>
+                            <option id="label_f2" class="female" value="f2" translation="f2"></option>
+                            <option id="label_f3" class="female" value="f3" translation="f3"></option>
+                            <option id="label_f4" class="female" value="f4" translation="f4"></option>
+                            <option id="label_m1" class="male"   value="m1" translation="m1"></option>
+                            <option id="label_m2" class="male"   value="m2" translation="m2"></option>
+                            <option id="label_m3" class="male"   value="m3" translation="m3"></option>
+                            <option id="label_m4" class="male"   value="m4" translation="m4"></option>
+                        </select>
+                    </div>
+
+                    <div id="voice_profiles">
+                        <p style="margin-block-end: 4px;" translation="voice.profile"></p>
+                        <div id="voice_profile_select">
+                            <select id="voice_profile_slot" onchange="loadVoiceProfile()" tabindex="-1">
+                                <option id="save_1" value="1" selected>1</option>
+                                <option id="save_2" value="2">2</option>
+                                <option id="save_3" value="3">3</option>
+                                <option id="save_4" value="4">4</option>
+                                <option id="save_5" value="5">5</option>
+                            </select>
+                            <input type="text" id="voice_profile_name" translation="settings.none"/>
+                        </div>
+                        <div id="voice_profile_buttons" class="button_row">
+                            <svg-button icon="accept" id="save_profile_button" onclick="saveVoiceProfile()" onmousedown="window.audio.play('sfx.caret', { static: true, channel: 2, volume: 0.55 })" title="Save" style="border-radius: 8px 0px 0px 8px;" disabled="false"></svg-button>
+                            <svg-button icon="close" id="delete_profile_button" onclick="deleteVoiceProfile()" onmousedown="window.audio.play('sfx.at', { static: true, channel: 2, volume: 0.55 })" title="Delete" style="border-radius: 0px 8px 8px 0px;" disabled="false"></svg-button>
+                        </div>
+                    </div>
+                </div>
+                <!-- NOTES -->
+                <div class="audio_editor" show="false">
+                    <label class="editor_label" style="display: flex;" translation="note.instrument">
+                        <select id="note_instrument">
+                            <option value="girl"       translation="girl">girl</option>
+                            <option value="boy"        translation="boy">boy</option>
+                            <option value="cranky"     translation="cranky">cranky</option>
+                            <option value="kk_slider"  translation="kk_slider">kk_slider</option>
+                            <option value="guitar"     translation="guitar" selected>guitar</option>
+                            <option value="e_piano"    translation="e_piano">e_piano</option>
+                            <option value="organ"      translation="organ">organ</option>
+                            <option value="synth"      translation="synth">synth</option>
+                            <option value="whistle"    translation="whistle">whistle</option>
+                        </select>
+                    </label>
+                    <br/>
+                    <label class="editor_label" style="display: flex;" translation="note.transpose">
+                        <div>
+                            <input id="note_transpose" class="editor_slider" type="range" min="-12" max="12" step="1" value="0" defaultValue="0"></input>
+                            <input type="text" id="note_transpose_out" class="editor_output" />
+                        </div>
+                    </label>
+                </div>
+                <!-- SOUND EFFECTS -->
+                <div class="audio_editor" show="false"></div>
+
+            </div>
+        </div>
+
+        <div id="master_volume_group">
+            <input id="master" min="0" max="100" step="1" orient="vertical" type="range" defaultValue="50">
+            <input type="text" id="master_out" class="editor_output" display="percent" />
+        </div>
+
+    </div>
+
+    <script src="./assets/jquery.js"></script>
+    <script src="./renderer/animalese.cjs"></script>
+    <script src="./renderer/editor.cjs"></script>
+
+    <!-- TTS Engine Script -->
+    <script src="./renderer/tts-engine.cjs"></script>
+    <script src="./renderer/tts-ui.cjs"></script>
+
+    <script>
+        // changeTab 함수 정의
+        function changeTab(tabIndex) {
+            // 모든 탭 버튼 비활성화
+            const tabs = document.querySelectorAll('.remap_tab');
+            tabs.forEach((tab, index) => {
+                tab.setAttribute('pressed', index === tabIndex ? 'true' : 'false');
+            });
+
+            // 모든 섹션 숨기기
+            const editors = document.querySelectorAll('.audio_editor');
+            editors.forEach(editor => editor.setAttribute('show', 'false'));
+
+            // TTS UI도 숨기기
+            const ttsUI = document.getElementById('tts_ui_container');
+            if (ttsUI) ttsUI.setAttribute('show', 'false');
+
+            // 해당 섹션 표시
+            if (tabIndex === 0) {
+                // Special Functions
+            } else if (tabIndex === 1) {
+                // Speech (TTS 포함)
+                document.getElementById('voice_profile_editor').setAttribute('show', 'true');
+                if (ttsUI) ttsUI.setAttribute('show', 'true');
+                // TTS 초기화
+                if (window.audio && !window.ttsInitialized) {
+                    initTTS(window.audio);
+                    loadVoiceProfiles();
+                    window.ttsInitialized = true;
+                }
+            } else if (tabIndex === 2) {
+                // Instruments
+            } else if (tabIndex === 3) {
+                // Sound Effects
+            }
+        }
+    </script>
+</body>
+</html>

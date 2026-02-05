@@ -1,0 +1,185 @@
+:root {
+    --key-size: 16px;
+    --outline-width: 10px;
+}
+
+.remap_controller[show=false] {
+    display: none;
+}
+.remap_controller {
+    overflow: overlay;
+    height: 163px;
+    width: 416px;
+    margin: 8px;
+    padding: 8px;
+    background-color: var(--secondary-bg-color);
+    user-select: none;
+    border-radius: 6px;
+    filter: drop-shadow(0 6px 0px var(--drop-shadow-color));
+}
+
+.highlighted, .highlighted .key-label, .highlighted .button-top, .highlighted[btn-type=b] .button-top {
+    fill: var(--input-highlight-color-2);
+    --alt1-color: var(--input-highlight-color-2);
+    color: var(--input-highlight-text-color);
+}
+.highlighted .key-icon {
+     fill: var(--input-highlight-text-color);
+}
+
+/*#region KEYBOARD */
+key-board {
+    display: inline-block;
+    flex: 0 0 auto;
+}
+.key-label-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.key-label {
+    z-index: 1;
+    position: absolute;
+    pointer-events: none;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--accent-color);
+    transition: transform 0.33s ease, font-size 0.2s ease;
+}
+
+piano-key .key-label 
+{font-size: clamp(1px, 100%, calc(var(--key-size) * 2 / max(1, var(--label-length))));}
+piano-key[btn-type=b] .key-label
+{font-size: clamp(1px, 100%, calc(var(--key-size) * 2 / max(1, (var(--label-length)*.5))));}
+.key_s .key-label {font-size: clamp(1px, 100%, calc(var(--key-size) * 1 / max(1, (var(--label-length)*.33))));}
+.key_m .key-label {font-size: clamp(1px, 100%, calc(var(--key-size) * 2 / max(1, (var(--label-length)*.33))));}
+.key_l .key-label {font-size: clamp(1px, 100%, calc(var(--key-size) * 3 / max(1, (var(--label-length)*.33))));}
+
+.key-icon {
+    position: absolute;
+    pointer-events: none;
+    width: 60%;
+    height: 60%;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    fill:var(--accent-color);
+    stroke: var(--accent-color);
+    transition: transform 0.33s ease;
+}
+.key-row {
+    height: calc(1.05 * var(--key-size * 2));
+}
+key-button, .key_s, .key_m, .key_l, .key_blank {
+    width: calc(var(--key-size) * 2);
+    height: calc(var(--key-size) * 2);
+    margin-right: -2px;
+}
+.key_s {min-width: calc(1* var(--key-size) * 2);}
+.key_m {min-width: calc(2* var(--key-size) * 2);}
+.key_l {min-width: calc(3* var(--key-size) * 2);}
+
+key-button .button-top {
+    fill: var(--secondary-bg-color);
+    transform: translate(0px,0px);
+    transition: all 0.33s ease;
+}
+
+key-button.pressed .button-top {
+    fill:var(--input-highlight-color);
+    transform: translate(0px,4px);
+    transition: transform 0.07s ease;
+}
+key-button.pressed .key-label {
+    color: var(--input-highlight-text-color);
+    transform: translate(-50%, calc(-50% + 12.5%));
+    transition: transform 0.07s ease;
+}
+
+key-button.pressed .key-icon {
+    fill: var(--input-highlight-text-color);
+    transform: translate(-50%, calc(-50% + 8%));
+    transition: transform 0.07s ease;
+}
+/*#endregion*/
+
+
+
+
+/*#region PIANO*/
+piano-board {
+    display: inherit;
+}
+#piano_back {
+    background-color: var(--secondary-bg-color);
+    border-radius: 8px;
+    filter: drop-shadow(0 16px 0px var(--drop-shadow-color));
+    width: 100%;
+    padding: 8px;
+    margin: 0px -8px;
+    height: calc(var(--key-size) * 2.5);
+    transform: translateY(-8px);
+}
+#piano_keys {
+    width: 100%;
+    overflow: auto hidden;
+    flex: 0 0 auto;
+    display: inline-flex;
+    justify-content:flex-start;
+}
+piano-key .key-label {
+    color: #00000010;
+    translate: -2px  26px;
+}
+piano-key, .piano_l, .piano_m, .piano_r, .piano_b {
+    transform: translateX(calc(var(--key-size) / 3));
+    margin: 0px calc(var(--key-size) * -0.5);
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+    min-width: calc(var(--key-size) * 3);
+    min-height: calc(var(--key-size) * 6);
+    width: calc(var(--key-size) * 3);
+    height: calc(var(--key-size) * 6);
+    display: inline-block;
+}
+
+piano-key[btn-type=b], .piano_b {
+    z-index: 0;
+    min-width: calc(var(--key-size) * 2);
+    min-height: calc(var(--key-size) * 4.5);
+    width: calc(var(--key-size) * 2);
+    height: calc(var(--key-size) * 4.5);
+}
+piano-key[btn-type=b] {
+    margin: 0px calc(var(--key-size) * -1);
+}
+
+piano-key .button-top {
+    pointer-events:all;
+    transform: translate(0px,0px);
+    fill:#ffffff;
+    transition: all 0.33s ease;
+}
+piano-key[btn-type=b] .button-top {
+    fill:#444444;
+}
+piano-key .button-top:hover {
+    transition: fill 0.1s ease;
+    transition: stroke 0.1s ease;
+    transition: transform 0.33s ease-out;
+}
+piano-key.pressed .button-top {
+    fill:var(--input-highlight-color);
+    transform: translate(0px,4px);
+    transition: transform 0.07s ease;
+}
+piano-key.pressed .key-label {
+    color: #ffffff;
+    transform: translate(-50%, calc(-50% + 4px));
+    transition: transform 0.07s ease;
+}
+/*#endregion*/

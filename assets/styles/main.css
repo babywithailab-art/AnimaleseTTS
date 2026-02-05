@@ -1,0 +1,1650 @@
+/*
+author: joshxviii 
+*/
+
+/* TODO: this file is getting kinda huge... */
+/* consolidate some stlyes that are redundent and */
+
+/*#region GENERAL */
+@font-face {
+    font-family: "Arial Rounded Bold";
+    src: url('../fonts/Arial Rounded MT Bold Regular.ttf');
+}
+html, body{
+  overflow: hidden;
+  background: linear-gradient(145deg, #f5edd8, #e8dbc3);
+}
+p {
+    font-size: 12px;
+    color: rgb(from var(--main-text-color) r g b / 0.6);
+    margin: 0px;
+    text-align: center;
+}
+div[show=false], div[show=false] text {
+    visibility: hidden;
+    opacity: 0%;
+}
+/* “가로세로 비율 고정” 풀기: 컨테이너가 남는 공간을 끝까지 채우게 */
+#main-win{
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+}
+
+/* 창이 화면을 꽉 쓰게 (비율 고정 X) */
+#main-win{
+  left: 0;
+  top: 0;
+  transform: none;
+
+  width: 100%;
+  height: 100%;
+
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  min-height: 0;
+
+  border-radius: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* 창의 반응형 처리 - 컴팩트한 크기 */
+@media (max-width: 800px) {
+    /* 컴팩트 모드 */
+}
+
+@media (max-width: 500px) {
+    /* 모바일 모드 */
+}
+/* 내부도 꽉 차게 */
+#main_content{
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  /* 고정 크기에 맞는 패딩 */
+  padding: 15px;
+  padding-top: 25px;
+  padding-left: 15px;
+  padding-right: 15px;
+
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  /* 왼쪽 정렬 */
+  margin: 0;
+}
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+@media (max-width: 800px) {
+    #main_content{
+        padding-right: 16px;
+        padding-bottom: 16px;
+        padding-left: 16px;
+        padding-top: 28px;
+    }
+}
+
+@media (max-width: 500px) {
+    #main_content{
+        padding-right: 12px;
+        padding-bottom: 12px;
+        padding-left: 12px;
+        padding-top: 26px;
+    }
+}
+*/
+
+/* 3) top/bottom 섹션도 고정폭/높이로 버티지 않게 */
+#top_section, #bottom_section{
+  width: 100%;
+  max-width: none;
+}
+
+/* 2) 상단 두 패널 테두리 "삐져나옴" 방지 (박스모델 통일) */
+#top_section,
+#text_input_panel,
+#srt_preview,
+#bottom_section,
+#voice_profile_editor{
+  box-sizing: border-box;
+}
+
+#top_section{
+  padding: 15px;
+  background: linear-gradient(145deg, #f8f2d7, #f5e9c8);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(139, 115, 85, 0.15);
+  box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+  position: relative;
+  width: 100%;
+  max-width: none;
+}
+
+/* 통합된 텍스트 입력 및 SRT 패널 */
+#text_input_panel{
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 12px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--input-accent-color);
+  background: linear-gradient(145deg, #fffaf0, #f0e6d0);
+  box-shadow: inset 0 2px 8px rgba(139, 115, 85, 0.1);
+  position: relative;
+  min-width: 0;
+  gap: 10px;
+  flex: 1;
+  height: auto;
+}
+
+/* SRT 버튼 스타일 */
+.action_button.srt_button {
+  flex: 0 0 auto;
+}
+
+/* SRT 패널 제거됨 - text_input_panel에 통합됨 */
+
+/* 패널 간 구분선 제거됨 */
+
+/* 패널 제목 제거됨 */
+
+
+#main_content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 하단 섹션 - 컴팩트하게 */
+#bottom_section{
+    background: linear-gradient(145deg, #f8f2d7, #f0e6d0);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(139, 115, 85, 0.15);
+    box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+    flex: 0 0 auto;  /* 컴팩트하게 - 내용에 맞게 */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+
+
+/* 패널과 입력 요소에 box-sizing: border-box 적용 */
+#text_input_panel,
+#tts_input,
+#srt_file {
+    box-sizing: border-box;
+}
+
+/* 패널 테두리 밖으로 튀어나옴 방지 */
+#text_input_panel {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+#tts_input{
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 100px;
+    max-width: 100%;
+    padding: 12px;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    background: linear-gradient(145deg, #fffef8, #f5edd8);
+    color: var(--main-text-color);
+    resize: vertical;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 8px rgba(139, 115, 85, 0.15);
+}
+
+#tts_input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(224, 196, 158, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#srt_file {
+    width: 100%;
+    flex: 1 1 auto;
+    max-width: 100%;
+    padding: 12px;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 8px;
+    background-color: var(--input-bg-color);
+    color: var(--main-text-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#srt_file:hover, #srt_file:focus {
+    border-color: var(--input-accent-color);
+    background-color: var(--secondary-bg-color);
+    box-shadow: 0 0 0 3px rgba(209, 180, 139, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button_group{
+    gap: 10px;
+    margin-top: auto;
+    flex-wrap: nowrap;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SRT 패널의 버튼 그룹은 위쪽으로 붙지 않게 (자연 높이) */
+#srt_panel .button_group{
+    margin-top: 0;
+}
+
+.action_button{
+    flex: 0 0 auto;
+    width: 100px;
+    min-width: 0;
+    padding: 10px 8px;
+    background: linear-gradient(135deg, var(--accent-color), var(--input-accent-color));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: "Arial Rounded Bold";
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,.10);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.action_button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(224, 196, 158, 0.6);
+    filter: brightness(1.15) saturate(1.2);
+}
+
+.action_button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(224, 196, 158, 0.4);
+}
+
+.action_button.secondary {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+.action_button.secondary:hover {
+    filter: brightness(1.15) saturate(1.2);
+}
+
+.button_icon {
+    font-size: 18px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* 3) SRT Preview: 지금 "짧은 줄"처럼 보이는거 확실히 보이게 */
+#srt_preview{
+  display: block;
+  width: 100%;
+  height: 140px;        /* 필요하면 180px */
+  padding: 12px;
+  overflow: auto;
+  border-radius: 12px;
+  border-width: 1px;
+  background: linear-gradient(135deg, var(--secondary-bg-color), var(--input-bg-color));
+  border: 1px solid var(--input-accent-color);
+  margin: 0 0 12px 0;
+}
+
+/* (만약 내부가 <textarea>나 리스트면 같이 키우기) */
+#srt_preview textarea,
+#srt_preview .preview_list,
+#srt_preview .list{
+  width: 100%;
+  height: 100%;
+}
+
+#srt_preview h4 {
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    color: var(--main-text-color);
+    font-weight: bold;
+}
+
+#srt_cues_list {
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: var(--input-bg-color);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.cue_item {
+    padding: 10px;
+    margin: 6px 0;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 6px;
+    background-color: var(--secondary-bg-color);
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.cue_item:hover {
+    background-color: var(--input-bg-color);
+    border-color: var(--accent-color);
+    transform: translateX(2px);
+}
+
+/* 하단 섹션 - 컴팩트하게 */
+#bottom_section{
+    background: linear-gradient(145deg, #f8f2d7, #f0e6d0);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(139, 115, 85, 0.15);
+    box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+    flex: 0 0 auto;  /* 컴팩트하게 - 내용에 맞게 */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+#top_row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    box-sizing: border-box;
+}
+.title-bar {
+    width: 100%;
+    height: 30px;
+    max-width: 100%;
+    -webkit-app-region: drag;
+    z-index: 100;
+    background-color: var(--drop-shadow-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 10px;
+    padding-block: 4px;
+}
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+@media (max-width: 800px) {
+    .title-bar {
+        height: 28px;
+        padding: 0px 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    .title-bar {
+        height: 26px;
+        padding: 0px 6px;
+    }
+}
+*/
+#resize-border {
+    height: 6px;
+    z-index: 100;
+    background: transparent;
+    -webkit-app-region: no-drag;
+    background-color: var(--accent-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+#title {
+    color: #f0feff;
+}
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+@media (max-width: 800px) {
+    #title {
+        font-size: 13px;
+    }
+    #disabled_warning {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 500px) {
+    #title {
+        font-size: 11px;
+    }
+    #disabled_warning {
+        font-size: 9px;
+    }
+}
+*/
+
+.separator {
+    width: 95%;
+    height: 0px;
+    padding: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    margin: 6px auto 8px auto;
+    border-radius: 16px;
+    opacity: 0.4;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #00000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(from var(--accent-color) r g b / 1);
+    border-radius: 8px;
+}
+
+::selection {
+    color: var(--input-highlight-text-color);
+    background-color: var(--input-highlight-color);
+    border-radius: 8px;
+}
+
+.footer {
+    padding-top:0px;
+    padding-bottom:0px;
+    bottom:0;
+    width:100%;
+    height:20px;
+
+    display: inline-block;
+}
+
+.footer a, .footer p {
+    font-size: 12px;
+    color: rgb(from var(--main-text-color) r g b / 0.2);
+}
+
+#reset_settings {
+    position: relative;
+    overflow: hidden;
+}
+#reset_settings::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background-color: rgba(255, 0, 0, 0);
+    z-index: 0;
+    pointer-events: none;
+    transition: background-color 2s ease-out;
+}
+#reset_settings:active::before {
+    background-color: #ff000087;
+    animation: load 1.5s linear forwards
+}
+
+@keyframes load {
+    0% { width: 0%; }
+    99% { width: 100%; }
+    100% { width: 0%; }
+}
+
+#reset_settings span {
+    position: relative;
+    z-index: 1;
+}
+
+[disabled=true] {
+    transition: opacity 0.3s ease;
+    user-select: none;
+    cursor: default;
+    pointer-events: none;
+    opacity: 40%;
+}
+
+/*#endregion GENERAL */
+
+/*#region BUTTONS */
+
+input[type=button], button {
+    background-color: var(--input-bg-color);
+    color:var(--main-text-color);
+    font-family: "Arial Rounded Bold";
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+input[type=button]:not(:disabled):hover, button:not(:disabled):hover {
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); 
+    transform: scale(1.05);
+}
+
+input[type=button]:active, button:active {
+    background-color: var(--input-accent-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95);
+}
+
+input[type=button]:disabled, button:disabled  {
+    background-color: var(--secondary-bg-color);
+    color: var(--input-accent-color); 
+    cursor: not-allowed;
+    box-shadow: none; 
+    outline: none;
+}
+
+input[type=checkbox] {
+    outline: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 4px;
+    background-color: var(--input-bg-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+input[type=checkbox]:checked::after input[type=checkbox]:checked::before {
+    transition: all 0.3s;
+}
+
+input[type=checkbox]:checked::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: 15%;
+    width: 4px;
+    height: 8px;
+    border: solid var(--input-highlight-color);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+[inactive=true] input[type=checkbox]:checked::after, [inactive=true] input[type=checkbox]:checked::before {
+    content: '';
+    transform: rotate(45deg);
+    position: absolute;
+    bottom: -2px;
+    left: 3px;
+    width: 0px;
+    height: 13px;
+    border: solid var(--input-highlight-color-3);
+    border-radius: 2px;
+    border-width: 1px 3px 1px 0px;
+}
+[inactive=true]  input[type=checkbox]:checked::before {
+    transform: rotate(-45deg);
+}
+
+
+input[type=checkbox]:hover,input[type=radio]:hover {
+    background-color: var(--accent-color);
+    border-color: var(--input-accent-color);
+}
+
+input[type=radio] {
+    outline: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background-color: var(--input-bg-color);
+    border: 2px solid var(--input-accent-color);
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+input[type=radio]:checked::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background-color: var(--input-highlight-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#remap_type_select input[type=radio] {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+}
+
+#remap_type_select input[type=radio]:checked::before {
+    width: 11px;
+    height: 11px;
+}
+
+#remap_type_select label {
+    font-size: 20px;
+    color: transparent;
+    text-shadow: 0px 0px 0px var(--accent-color);
+}
+
+.toggle {
+    --toggle-width: 25px;
+    position: relative;
+    width: var(--toggle-width);
+    height: 14px;
+}
+.toggle input {
+  display: none;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--input-bg-color);
+    transition: 0.3s;
+    border-radius: 34px;
+    border: 2px solid var(--input-accent-color);
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 10px;
+    transform-origin: center;
+    background-color: var(--input-highlight-color);
+    transition: 0.3s;
+    border-radius: 50%;
+}
+input:checked + .slider:before {
+    transform: translateX(calc(var(--toggle-width) - 4px - 100%));
+}
+
+svg-button {
+    --alt1-color: var(--accent-color);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transition: all 0.1s ease;
+    -webkit-app-region: no-drag;
+}
+svg-button:hover {
+    transform: scale(1.07);
+    z-index: 2;
+}
+svg-button:active  {
+    transform: scale(.9);
+}
+
+.title-bar svg-button {
+    --alt1-color: #ffffff;
+    transform-origin: center;
+    width: 24px;
+    height: 24px;
+}
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+@media (max-width: 800px) {
+    .title-bar svg-button {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+@media (max-width: 500px) {
+    .title-bar svg-button {
+        width: 20px;
+        height: 20px;
+    }
+}
+*/
+#male, #female {
+    --alt1-color: #f3f3f3;
+    --alt2-color: #4b4b4b;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--secondary-bg-color), var(--input-bg-color));
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+}
+#male g, #female g {
+    filter: drop-shadow(0px 2px 0px rgba(0, 0, 0, 0.2));
+}
+#male[pressed=true] g {
+    filter: drop-shadow(0px 2px 0px #ace3ff);
+}
+#female[pressed=true] g {
+    filter: drop-shadow(0px 2px 0px #ffc3f7);
+}
+
+#male[pressed=true] {
+    --alt1-color: #d2eeff;
+    --alt2-color: #00aaff;
+    background: linear-gradient(135deg, #d2eeff, #a8ddff);
+    filter: drop-shadow(0 0 8px #00aaff80);
+    border-color: #00aaff;
+    transform: scale(1.15);
+}
+#female[pressed=true] {
+    --alt1-color: #ffe9ff;
+    --alt2-color: #ff5ce9;
+    background: linear-gradient(135deg, #ffe9ff, #ffd6ff);
+    filter: drop-shadow(0 0 8px #ff5ce980);
+    border-color: #ff5ce9;
+    transform: scale(1.15);
+}
+
+#male:not([pressed=true]):hover, #female:not([pressed=true]):hover {
+    transform: scale(1.08);
+    border-color: var(--accent-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button_row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+.button_row svg-button {
+    width: 100%;
+    background-color: var(--secondary-bg-color);
+    border-radius: 32px;
+    margin: 0px 8px;
+    box-shadow: 0px 0px 0px var(--drop-shadow-color);
+}
+.button_row svg-button[disabled=false]:not(:active) {
+    box-shadow: 0px 4px 0px var(--drop-shadow-color);
+    translate: 0px -4px;
+}
+.button_row svg-button:hover  {
+    transform: scale(1);
+}
+.button_row svg-button:active  {
+    transform: scale(1);
+    translate: 0px 0px;
+}
+/*#endregion BUTTONS */
+
+/*#region SFX BUTTON */
+.action_button.sfx_button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    border: 3px solid transparent;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.action_button.sfx_button:hover {
+    transform: scale(1.1);
+    filter: brightness(1.15) saturate(1.2);
+    box-shadow: 0 6px 12px rgba(224, 196, 158, 0.6);
+}
+
+.action_button.sfx_button:active {
+    transform: scale(0.95);
+}
+
+.action_button.sfx_button[pressed="true"] {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-color: #27ae60;
+    box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+.action_button.sfx_button[pressed="true"]:hover {
+    filter: brightness(1.2) saturate(1.3);
+    box-shadow: 0 8px 16px rgba(46, 204, 113, 0.8);
+}
+
+/*#endregion SFX BUTTON */
+
+/*#region SLIDERS */
+
+
+input[type=range] {
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    background: var(--input-bg-color);
+    border-radius: 10px;
+    border: 2px solid var(--input-accent-color);
+}
+input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    border-style: none;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), var(--input-accent-color));
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -1px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(224, 196, 158, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+input[type=range]::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+}
+/*#endregion SLIDERS*/
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+@media (max-width: 980px){
+  #text_input_panel{
+    min-width: 100%;
+  }
+}
+*/
+
+/* 고정 크기 - 반응형 비활성화 */
+/*
+// 고정 크기 - 모든 반응형 스타일 비활성화
+@media (max-width: 800px) {
+    // 반응형 스타일 제거
+*/
+
+    .action_button {
+        font-size: 12px;
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    /* 텍스트 입력 패널 */
+    #text_input_panel{
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 더 작은 화면에서도 버튼을同一 너비로 유지 */
+    .button_group {
+        flex-wrap: nowrap;
+    }
+
+    .action_button {
+        flex: 0 0 auto;
+        width: 120px;
+    }
+
+    /* 텍스트 입력창 크기 축소 */
+    #tts_input {
+        min-height: 80px;
+    }
+
+    /* 음성 타입 그룹을 세로로 */
+    #voice_profile_editor {
+        flex-direction: column;
+    }
+
+    #voice_type_group {
+        flex-direction: row;
+        justify-content: center;
+        min-width: 100%;
+    }
+
+    /* editor_label 높이 축소 */
+    .editor_label {
+        height: 28px;
+        margin-bottom: 6px;
+        padding: 3px 0;
+    }
+
+    .editor_label span {
+        min-width: 50px;
+        font-size: 11px;
+    }
+
+    .editor_label input.editor_output{
+        width: 48px;
+        max-width: 48px;
+        min-width: 48px;
+        padding: 5px 7px;
+        font-size: 11px;
+    }
+}
+
+/* 더 작은 화면 (360px) */
+/*
+// 고정 크기 - 모든 반응형 스타일 비활성화
+@media (max-width: 360px) {
+    /* 전체화면 모드에서는 반응형 너비/높이 제한 제거 */
+
+    #main_content{
+        padding-right: 8px;
+        padding-bottom: 8px;
+        padding-left: 8px;
+        padding-top: 24px;
+    }
+
+    .title-bar {
+        height: 24px;
+        padding: 0px 4px;
+    }
+
+    .title-bar svg-button {
+        width: 18px;
+        height: 18px;
+    }
+
+    #title {
+        font-size: 10px;
+    }
+
+    #disabled_warning {
+        font-size: 8px;
+    }
+
+    /* editor_label 높이 더 축소 */
+    .editor_label {
+        height: 24px;
+        margin-bottom: 4px;
+        padding: 2px 0;
+    }
+
+    .editor_label span {
+        min-width: 42px;
+        font-size: 9px;
+    }
+}
+*/
+
+/* TTS 관련 라벨 텍스트 숨김 - "tts." 접두어가 붙은 translation 속성 */
+[translation^="tts."] {
+    visibility: hidden !important;
+}
+
+/* TTS 진행률 */
+#tts_progress {
+    padding: 12px;
+    background-color: var(--secondary-bg-color);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid var(--accent-color);
+}
+
+#tts_progress_bar {
+    width: 100%;
+    height: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    appearance: none;
+}
+
+#tts_progress_bar::-webkit-progress-bar {
+    background-color: var(--input-bg-color);
+    border-radius: 12px;
+}
+
+#tts_progress_bar::-webkit-progress-value {
+    background: linear-gradient(90deg, var(--accent-color), var(--input-accent-color));
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+
+#tts_progress_bar::-moz-progress-bar {
+    background: linear-gradient(90deg, var(--accent-color), var(--input-accent-color));
+    border-radius: 12px;
+}
+
+#tts_progress_text {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--main-text-color);
+    font-weight: bold;
+}
+
+
+/*#region TEXTFIELDS */
+select {
+    height: 30px;
+    width: auto;
+    min-width: 100px;
+    font-size: 14px;
+    color: var(--main-text-color);
+    font-family: "Arial Rounded Bold";
+    appearance: none;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    transition: all 0.33s ease;
+    background-color: var(--input-bg-color);
+    text-align: center;
+    text-align-last: center;
+    outline-style: none;
+    padding: 4px 8px;
+}
+select:hover{
+    border-color: var(--accent-color);
+    opacity: 100%;
+}
+
+input[type=text] {
+    width: 100px;
+    background-color: var(--input-bg-color);
+    border-radius: 8px;
+    display: inline-block;
+    color: var(--main-text-color);
+    text-align: center;
+    overflow: hidden;
+    max-height: 18px;
+    min-height: 18px;
+    font-size: 16px;
+    font-family: "Arial Rounded Bold";
+    border: 0;
+    outline: none !important;
+}
+
+input[type=text]::placeholder {
+    color: rgb(from var(--main-text-color) r g b / 0.3);
+}
+
+/* 파일 입력 필드 */
+input[type=file] {
+    font-size: 14px;
+    color: var(--main-text-color);
+    background-color: var(--input-bg-color);
+    border: 2px solid var(--input-accent-color);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type=file]:hover {
+    border-color: var(--accent-color);
+    background-color: var(--secondary-bg-color);
+}
+
+input[type=file]::file-selector-button {
+    padding: 6px 12px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-family: "Arial Rounded Bold";
+}
+
+/*#endregion TEXTFIELDS */
+
+/* STLYE FOR EDITOR */
+#voice_profile_editor {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    flex: 0 0 auto;
+    overflow: visible;
+}
+
+/* 4) 하단 슬라이더 컴팩트하게 */
+#sliders{
+  flex: 1;  /* 남은 공간 차지 */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  overflow: visible;
+}
+
+#slider_group {
+    display: flex;
+    flex-direction: row;
+}
+
+#voice_type_group{
+  flex: 0 0 180px;  /* 컴팩트하게 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+#voice_type_buttons {
+    display: flex;
+    gap: 15px;
+}
+
+#voice_type {
+    width: 120px;
+    font-size: 16px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    height: auto;
+    min-height: 36px;
+}
+
+#voice_profiles {
+    margin: 4px 0px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#voice_profiles p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--main-text-color);
+}
+
+#voice_profile_select {
+    display: flex;
+    position: relative;
+    gap: 5px;
+}
+
+#voice_profile_select::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    top: 51%;
+    width: 0;
+    height: 0;
+    border-radius: 2px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 5px solid var(--accent-color);
+    transform: translate(7px, -50%);
+}
+
+#voice_profile_slot {
+    font-size: 18px;
+    width: 40px;
+    height: 31px;
+    margin: 0;
+    border-radius: 8px 0px 0px 0px;
+    color: var(--main-text-color);
+    position: relative;
+    background-color: var(--input-bg-color);
+    border: 2px solid var(--input-accent-color);
+    border-right: none;
+}
+
+#voice_profile_slot option {
+    color: var(--main-text-color);
+    text-align: start;
+}
+#voice_profile_slot option:checked {
+    color: var(--input-highlight-color);
+}
+
+#voice_profile_name {
+    font-size: 14px;
+    text-align: center;
+    width: 100px;
+    min-height: 30px;
+    max-height: 30px;
+    border-radius: 0px 8px 0px 0px;
+    padding: 4px 8px;
+    border: 2px solid var(--input-accent-color);
+    background-color: var(--input-bg-color);
+    color: var(--main-text-color);
+}
+
+#voice_profile_slots option:hover {
+    background-color: var(--input-accent-color);
+    color: var(--input-highlight-text-color);
+}
+
+#voice_profile_slots option:checked {
+    background-color: var(--input-accent-color);
+    color: var(--input-highlight-text-color);
+}
+
+#voice_profile_buttons {
+    background-color: var(--secondary-bg-color);
+    padding: 8px 13.5px;
+    margin: -1px;
+    border-radius: 0px 0px 8px 8px;
+    display: flex;
+    gap: 5px;
+}
+
+#voice_profile_buttons svg-button {
+    width: 42px;
+    height: 22px;
+    margin: 0px;
+    flex: 1;
+}
+
+#voice_profile_buttons svg-button .svg-button.pressed {
+    opacity: 0.7;
+    filter: brightness(0.9);
+}
+
+#voice_type.female {
+    background-color: #ffe9ff;
+    color: #ff8bcb;
+    border-color: #ff8bcb;
+}
+#voice_type.male {
+    background-color: #d2eeff;
+    color: #00aaff;
+    border-color: #00aaff;
+}
+#voice_type.female option.male,
+#voice_type.male option.female {
+    display: none;
+}
+
+.editor_slider {
+    display: block;
+    width: 50px;
+    height: 20px;
+    transition: all 0s;
+    flex: 0 0 50px;
+    margin: 0;
+    min-width: 50px;
+}
+.editor_label {
+    font-weight: bold;
+    color: var(--main-text-color);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 6px;
+    padding: 3px 0;
+    width: 100%;
+    gap: 12px;
+    flex-grow: 1;
+    line-height: 1.2;
+    height: 26px;
+}
+
+.editor_label span {
+    min-width: 0;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.editor_label input[type=range] {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+}
+
+.editor_label input.editor_output {
+    flex-shrink: 0;
+    width: 60px;
+    min-width: 60px;
+}
+.editor_output {
+    max-width: 55px;
+    min-width: 45px;
+    padding: 6px 10px;
+    border: 2px solid var(--input-accent-color);
+    border-radius: 6px;
+    background-color: var(--input-bg-color);
+    color: var(--main-text-color);
+    font-size: 13px;
+    text-align: center;
+    font-weight: bold;
+    height: auto;
+    min-height: 26px;
+}
+
+#key_remapper {
+    margin: 8px 0px 0px 0px;
+    padding: 8px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: var(--secondary-bg-color);
+    border-radius: 16px 16px 0px 0px;
+    box-sizing: border-box;
+    color: var(--accent-color);
+    font-size: 14px;
+    text-align: center;
+    flex-direction: column;
+    min-height: 147px;
+    max-height: 147px;
+    z-index: 2;
+}
+
+#remap_monitor {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color:var(--accent-color);
+    min-width: 16px;
+    min-height: 16px;
+    background-color: var(--input-bg-color);
+    border-radius: 8px;
+    padding: 8px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    line-height: 16px;
+    transition: all 0.2s ease;
+    border: 4px dashed transparent;
+    margin-block-end: 8px;
+}
+#remap_monitor[monitoring=true] {
+    border: 4px dashed rgb(from var(--input-highlight-color) r g b / 0.65);
+}
+#remap_monitor.remapping {
+    border-color: var(--input-highlight-color-2);
+}
+
+#remap_in {
+    width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    position: absolute;
+    background-color: rgb(from var(--input-highlight-color-2) r g b / 0.6);
+    caret-color: transparent;
+    color: transparent;
+}
+
+#remap_tabs {
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 32px;
+    z-index: 3;
+}
+
+.remap_tab[pressed=true] {
+    background-color: var(--secondary-bg-color);
+    filter: drop-shadow(0 6px 0px var(--drop-shadow-color));
+    translate: 0px 0px;
+}
+
+.remap_tab {
+    transform-origin: top;
+    border-radius: 0px 0px 8px 8px;
+    translate: 0px 6px;
+    background-color: var(--input-bg-color);
+    filter: drop-shadow(0 -6px 0px var(--drop-shadow-color));
+    flex: 1;
+}
+.remap_tab:hover {
+    transform: scale(1);
+}
+.remap_tab:active {
+    transform: scaleY(.9);
+}
+
+#settings_overlay {
+    width: 350px;
+    height: auto;
+    max-height: 400px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--main-bg-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.settings_header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings_header h2 {
+    font-size: 20px;
+    color: var(--main-text-color);
+    margin: 0;
+}
+
+.close_button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close_button:hover {
+    background: var(--input-accent-color);
+    transform: scale(1.1);
+}
+#settings_overlay h3 {
+    font-size: 16px;
+    color: var(--main-text-color);
+    margin: 12px 0 8px 0;
+}
+#settings_overlay label {
+    font-size: 14px;
+    color: rgb(from var(--main-text-color) r g b / 0.8);
+    display: inline-block;
+    align-self: flex-start;
+}
+#settings_overlay label input, .toggle {
+    margin: 0px 7px -2px 7px;
+}
+
+#settings_overlay .catagory {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.catagory div, .catagory table {
+    width: 100%;
+}
+
+#settings_overlay select {
+    width: 150px;
+    height: 32px;
+}
+
+#settings_overlay option {
+    color: var(--main-text-color);
+}
+
+
+#focus_out {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    z-index: 50;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0000002f;
+}
+#focus_out[show=false] {
+    z-index: -1;
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+}
+
+#focus_out[show=false] #settings_overlay {
+    z-index: -1;
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+}
+
+#focus_out[show=true] {
+    z-index: 50;
+    opacity: 1;
+    visibility: visible;
+    display: flex;
+}
+
+#focus_out[show=true] #settings_overlay {
+    z-index: 200;
+    opacity: 1;
+    visibility: visible;
+    display: flex;
+}
+
+#apps_table label {
+    font-size: 11px;
+}
+
+td label {
+  display: inline-block;
+  max-width: 208px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--main-text-color);
+    text-align: center;
+    margin: 0;
+}
+
+.rad_button_list {
+    background-color: var(--secondary-bg-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding-block: 7px;
+}
+
+table {
+    width: 84%;
+    height: 160px;
+    background-color: var(--secondary-bg-color);
+    border-radius: 8px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+table thead {
+    color: var(--main-text-color);
+}
+
+.audio_editor {
+    padding: 0px 18px;
+    position: absolute;
+}
+
+#remap_controllers {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 147px;
+}
+
+.remap_controller[show=true] {
+    display: block;
+}
+
+.remap_controller[show=false] {
+    display: none;
+}
+
+#tts_ui_container {
+    padding: 0;
+    margin: 0;
+}
+
+
+#remap-table tbody tr:nth-child(even) {
+    background: rgb(from var(--secondary-bg-color) r g b / 1.0);
+}
+#remap-table tbody tr:nth-child(odd) {
+    background: rgb(from var(--input-bg-color) r g b / 1.0);
+}  
+#remap-table {
+    height: 90%;
+}
+#remap-table td {
+    width: 43%;
+    padding-block: 6px;
+}
+
+

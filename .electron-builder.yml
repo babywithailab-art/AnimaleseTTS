@@ -1,0 +1,42 @@
+win:
+  target:
+    - target: dir
+      arch:
+        - x64
+  icon: assets/images/icon.png
+  forceCodeSigning: false
+  sign: false
+  extraResources:
+    - from: resources/ffmpeg
+      to: ffmpeg
+    - from: icon.ico
+      to: icon.ico
+
+directories:
+  output: exports
+
+files:
+  - main.js
+  - preload.cjs
+  - editor.html
+  - remap.html
+  - "*.cjs"
+  - "renderer/**"
+  - "assets/**"
+  - "!assets/**/*.md"
+  - "!assets/**/*.tmp"
+  - "!assets/**/*.log"
+  - "!tests/**"
+  - "!docs/**"
+  - "!*.log"
+  - "!*.map"
+  - "!temp/**"
+  - "!src/**"
+  - LICENSE
+  - THIRD-PARTY-LICENSES.md
+  - FFMPEG_SETUP.md
+  - package.json
+
+asar: true
+asarUnpack:
+  - "assets/**"

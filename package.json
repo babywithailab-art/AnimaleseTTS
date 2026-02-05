@@ -1,0 +1,130 @@
+{
+  "name": "animalese-typing",
+  "productName": "Animalese TTS",
+  "version": "0.0.5",
+  "description": "Animalese TTS",
+  "repository": "https://github.com/joshxviii/animalese-typing-desktop",
+  "type": "module",
+  "author": {
+    "name": "joshxviii",
+    "email": "dagexviii.dev@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [],
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac-listener": "swiftc libs/key-listeners/mac-key-listener.swift -o libs/key-listeners/animalese-listener-x64 -target x86_64-apple-macosx11.0 && swiftc libs/key-listeners/mac-key-listener.swift -o libs/key-listeners/animalese-listener-arm64 -target arm64-apple-macosx11.0 && lipo -create -output libs/key-listeners/animalese-listener libs/key-listeners/animalese-listener-x64 libs/key-listeners/animalese-listener-arm64 && chmod +x libs/key-listeners/animalese-listener",
+    "build:win-listener": "g++    -o libs/key-listeners/animalese-listener.exe libs/key-listeners/win-key-listener.cpp -mwindows -static -static-libgcc -static-libstdc++",
+    "build:linux-listener": "g++    -o libs/key-listeners/animalese-listener libs/key-listeners/linux-key-listener.cpp -lX11 -lXtst && chmod +x libs/key-listeners/animalese-listener",
+    "build:mac": "npm run build:mac-listener && electron-builder --mac -p never",
+    "build:win": "npm run build:win-listener && electron-builder --win -p never",
+    "build:win:portable": "npm run build:win-listener && electron-builder --win portable -p never",
+    "build:win:portable:no-keylistener": "electron-builder --win portable -p never",
+    "build:win:dir": "electron-builder --win dir -p never",
+    "build:linux": "npm run build:linux-listener && electron-builder --linux -p never"
+  },
+  "build": {
+    "icon": "assets/images/icon_256x256.png",
+    "publish": {
+      "provider": "github",
+      "owner": "joshxviii",
+      "repo": "animalese-typing-desktop"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "assets/**"
+    ],
+    "appId": "com.joshxviii.animalese-typing",
+    "productName": "Animalese TTS",
+    "files": [
+      "main.js",
+      "preload.cjs",
+      "editor.html",
+      "remap.html",
+      "*.cjs",
+      "renderer/**",
+      "assets/**",
+      "!assets/**/*.md",
+      "!assets/**/*.tmp",
+      "!assets/**/*.log",
+      "!tests/**",
+      "!docs/**",
+      "!*.log",
+      "!*.map",
+      "!temp/**",
+      "!src/**",
+      "LICENSE",
+      "THIRD-PARTY-LICENSES.md",
+      "FFMPEG_SETUP.md",
+      "package.json"
+    ],
+    "directories": {
+      "output": "exports"
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true
+    },
+    "portable": {
+      "artifactName": "AnimaleseTTS-Portable-${arch}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/images/icon.png",
+      "extraResources": [
+        {
+          "from": "libs/key-listeners/animalese-listener",
+          "to": "animalese-listener"
+        },
+        {
+          "from": "assets/images/icon.png",
+          "to": "icon.png"
+        }
+      ],
+      "artifactName": "AnimaleseTTSSetup-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableArgs": [
+        "--no-sandbox"
+      ],
+      "category": "Utility",
+      "icon": "assets/images/icon.png",
+      "extraResources": [
+        {
+          "from": "libs/key-listeners/animalese-listener",
+          "to": "animalese-listener"
+        }
+      ],
+      "artifactName": "AnimaleseTTSSetup-${arch}.${ext}"
+    },
+    "afterSign": "build/after-sign-hook.js"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "electron-store": "^10.0.1",
+    "howler": "^2.2.4",
+    "store": "^2.0.12",
+    "update-electron-app": "^3.1.2"
+  },
+  "devDependencies": {
+    "electron": "^36.2.1",
+    "electron-builder": "~24.13.3",
+    "electron-rebuild": "^3.2.9"
+  },
+  "optionalDependencies": {
+    "@deepfocus/get-windows": "^1.0.21"
+  }
+}

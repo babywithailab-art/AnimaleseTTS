@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRT Cue 선택</title>
+    <style>
+        :root {
+            --accent-color: #E0C49C;
+            --input-accent-color: #D9B98F;
+            --secondary-bg-color: #f0e6d0;
+            --input-bg-color: #fffef8;
+            --main-text-color: #5a4a3a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Rounded Bold', Arial, sans-serif;
+            background: linear-gradient(145deg, #f8f2d7, #f0e6d0);
+            color: var(--main-text-color);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .title-bar {
+            width: 100%;
+            height: 30px;
+            max-width: 100%;
+            -webkit-app-region: drag;
+            background-color: var(--accent-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0px 10px;
+            z-index: 100;
+        }
+
+        .title-bar svg-button {
+            --alt1-color: #ffffff;
+            transform-origin: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .container {
+            margin-top: 30px;
+            max-width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--main-text-color);
+        }
+
+        .cue-item {
+            background: var(--input-bg-color);
+            border: 2px solid var(--input-accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cue-item:hover {
+            background-color: var(--secondary-bg-color);
+            border-color: var(--accent-color);
+            transform: translateX(2px);
+        }
+
+        .cue-item.selected {
+            background-color: var(--accent-color);
+            border-color: var(--input-accent-color);
+        }
+
+        .cue-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .cue-content {
+            flex: 1;
+        }
+
+        .cue-number {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        .cue-time {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .cue-text {
+            margin-top: 5px;
+            color: var(--main-text-color);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(145deg, #f8f2d7, #f0e6d0);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            border-top: 2px solid var(--input-accent-color);
+        }
+
+        button {
+            background: var(--accent-color);
+            color: var(--main-text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-family: 'Arial Rounded Bold', Arial, sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--input-accent-color);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.btn-select-all {
+            background: #4CAF50;
+            color: white;
+        }
+
+        button.btn-cancel {
+            background: #f44336;
+            color: white;
+        }
+
+        button.btn-confirm {
+            background: var(--accent-color);
+            color: var(--main-text-color);
+        }
+
+        .cues-container {
+            margin-bottom: 120px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <div style="color: white;">SRT Cue 선택</div>
+        <button onclick="window.close()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 5px 10px;">✕</button>
+    </div>
+
+    <div class="container">
+        <h1>SRT Cue 선택</h1>
+
+        <div class="controls" style="position: static; margin-bottom: 20px;">
+            <button class="btn-select-all" onclick="selectAll()">전체 선택</button>
+            <button class="btn-select-all" onclick="deselectAll()">전체 해제</button>
+            <button class="btn-confirm" onclick="confirmSelection()">확인</button>
+            <button class="btn-cancel" onclick="window.close()">취소</button>
+        </div>
+
+        <div class="controls" style="position: static; margin-bottom: 20px;">
+            <button class="btn-confirm" onclick="convertSelected()" style="background: #FF9800;">
+                📝 선택한 Cue → WAV
+            </button>
+            <button class="btn-confirm" onclick="convertAll()" style="background: #9C27B0;">
+                🎬 전체 SRT → WAV
+            </button>
+        </div>
+
+        <div id="cues-container" class="cues-container">
+            <!-- Cues will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Load cues from Electron IPC
+        let cues = [];
+        let srtFilePath = '';
+
+        // Electron 전역 변수에서 cues 가져오기 (fallback)
+        if (window.srtCues) {
+            cues = window.srtCues;
+            console.log('Cues loaded from window.srtCues:', cues.length);
+        }
+
+        // Electron IPC 메시지 수신 대기
+        if (typeof window !== 'undefined' && window.addEventListener) {
+            window.addEventListener('message', (event) => {
+                console.log('Message received in SRT window:', event.data);
+                if (event.data && event.data.type === 'srt-data') {
+                    cues = event.data.cues;
+                    srtFilePath = event.data.filePath;
+                    console.log('Cues received via postMessage:', cues.length);
+                    console.log('SRT file path received:', srtFilePath);
+                    // 데이터를 받은 후 cues 로드
+                    if (document.readyState === 'complete') {
+                        loadCues();
+                    } else {
+                        window.addEventListener('load', () => loadCues());
+                    }
+                }
+            });
+        }
+
+        console.log('Initial cues:', cues.length);
+        console.log('Initial SRT file path:', srtFilePath);
+
+        // Load cues when page is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded event fired');
+            // IPC나 postMessage로 데이터를 받지 못한 경우, 전역 변수에서 직접 가져오기 시도
+            if (cues.length === 0 && window.srtCues) {
+                cues = window.srtCues;
+                console.log('Cues loaded from window.srtCues (fallback):', cues.length);
+            }
+            if (!srtFilePath && window.srtFilePath) {
+                srtFilePath = window.srtFilePath;
+                console.log('SRT file path loaded from window.srtFilePath (fallback):', srtFilePath);
+            }
+            loadCues();
+        });
+
+        function loadCues() {
+            console.log('loadCues() function called');
+            console.log('Cues array:', cues);
+            console.log('Cues length:', cues ? cues.length : 'cues is null/undefined');
+
+            const container = document.getElementById('cues-container');
+            console.log('Cues container element:', container);
+
+            if (!container) {
+                console.error('Cues container not found - element with id "cues-container" does not exist');
+                return;
+            }
+
+            console.log('Clearing container innerHTML');
+            container.innerHTML = '';
+
+            if (!cues || cues.length === 0) {
+                console.log('No cues found - showing "No cues" message');
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No cues found</p>';
+                return;
+            }
+
+            console.log('Processing', cues.length, 'cues...');
+            cues.forEach((cue, index) => {
+                console.log(`Creating cue ${index + 1}:`, cue);
+                const cueDiv = document.createElement('div');
+                cueDiv.className = 'cue-item';
+                cueDiv.dataset.index = index;
+
+                const startTime = formatTime(cue.startTime);
+                const endTime = formatTime(cue.endTime);
+
+                cueDiv.innerHTML = `
+                    <input type="checkbox" id="cue_${index}" data-index="${index}" checked />
+                    <div class="cue-content">
+                        <div>
+                            <span class="cue-number">#${index + 1}</span>
+                            <span class="cue-time">[${startTime} - ${endTime}]</span>
+                        </div>
+                        <div class="cue-text">${escapeHtml(cue.text)}</div>
+                    </div>
+                `;
+
+                cueDiv.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = cueDiv.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                        updateCueSelection(index, checkbox.checked);
+                    }
+                });
+
+                cueDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    updateCueSelection(index, e.target.checked);
+                });
+
+                container.appendChild(cueDiv);
+            });
+
+            console.log('All cues loaded successfully');
+        }
+
+        function updateCueSelection(index, selected) {
+            const cueDiv = document.querySelector(`[data-index="${index}"]`);
+            if (cueDiv) {
+                if (selected) {
+                    cueDiv.classList.add('selected');
+                } else {
+                    cueDiv.classList.remove('selected');
+                }
+            }
+        }
+
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            document.querySelectorAll('.cue-item').forEach(item => item.classList.add('selected'));
+        }
+
+        function deselectAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('.cue-item').forEach(item => item.classList.remove('selected'));
+        }
+
+        function confirmSelection() {
+            const selectedCues = getSelectedCues();
+            if (selectedCues.length === 0) {
+                alert('선택된 cue가 없습니다.');
+                return;
+            }
+
+            // Send selected cues to parent window
+            sendMessageToParent({
+                type: 'srt-cues-selected',
+                cues: selectedCues,
+                filePath: srtFilePath
+            });
+
+            // 창을 닫지 않음 (사용자가 직접 닫을 때까지 유지)
+            console.log('Selection confirmed, window remains open');
+        }
+
+        function convertSelected() {
+            const selectedCues = getSelectedCues();
+            if (selectedCues.length === 0) {
+                alert('선택된 cue가 없습니다.');
+                return;
+            }
+
+            // Send selected cues for conversion
+            sendMessageToParent({
+                type: 'srt-cues-convert',
+                cues: selectedCues,
+                filePath: srtFilePath
+            });
+
+            // 창을 닫지 않음 (변환 중에도 유지)
+            console.log('Conversion started, window remains open');
+        }
+
+        function convertAll() {
+            // 전체 SRT를 하나의 WAV 파일로 변환
+            sendMessageToParent({
+                type: 'srt-convert-all',
+                filePath: srtFilePath
+            });
+
+            // 창을 닫지 않음 (변환 중에도 유지)
+            console.log('SRT conversion started, window remains open');
+        }
+
+        function sendMessageToParent(message) {
+            console.log('Sending message to parent:', message);
+            console.log('window.api:', window.api);
+            console.log('window.api.sendSRTMessage:', window.api && window.api.sendSRTMessage);
+
+            // Electron API 우선 사용
+            if (window.api && window.api.sendSRTMessage) {
+                console.log('Using IPC to send message');
+                window.api.sendSRTMessage(message);
+                console.log('Message sent via IPC:', message);
+                return;
+            }
+
+            // Fallback 1: 전역 함수 사용
+            if (window.parent && typeof window.parent.receiveSRTMessage === 'function') {
+                console.log('Using parent.receiveSRTMessage to send message');
+                window.parent.receiveSRTMessage(message);
+                console.log('Message sent via parent.receiveSRTMessage:', message);
+                return;
+            }
+
+            // Fallback 2: postMessage 사용
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage(message, '*');
+                    console.log('Message sent via parent.postMessage:', message);
+                } else if (window.opener) {
+                    window.opener.postMessage(message, '*');
+                    console.log('Message sent via opener.postMessage:', message);
+                } else {
+                    console.log('No parent or opener available, message:', message);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+
+        function getSelectedCues() {
+            const selectedCues = [];
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                if (index >= 0 && index < cues.length) {
+                    selectedCues.push(cues[index]);
+                }
+            });
+            return selectedCues;
+        }
+
+        function formatTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            const milliseconds = ms % 1000;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Listen for messages from opener window
+        window.addEventListener('message', (event) => {
+            console.log('Message received:', event.data);
+        });
+    </script>
+</body>
+</html>

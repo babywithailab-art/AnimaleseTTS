@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(ffprobe:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(awk:*)",
+      "Bash(npm run build:win:portable:no-keylistener)",
+      "Bash(npx electron-builder --win portable --dir)",
+      "Bash(npx electron-builder --win portable --dir --config.win.sign=false)",
+      "Bash(npx electron-builder:*)",
+      "Bash(npx asar pack:*)",
+      "Bash(zip:*)",
+      "Bash(python -c \"import zipfile; z = zipfile.ZipFile\\(''AnimaleseTTS-Portable.zip'', ''w''\\); [z.write\\(f\\) for f in [''main.js'', ''package.json'', ''editor.html'', ''remap.html'', ''test-tts.html'', ''preload.cjs'', ''renderer/tts-ui.cjs'', ''renderer/tts-engine.cjs'', ''audio-manager.cjs'', ''assets/'', ''libs/''] if os.path.exists\\(f\\) or os.path.isdir\\(f\\)]; z.close\\(\\)\")",
+      "Bash(python:*)",
+      "Bash(tar:*)",
+      "Bash(npm run build:win:dir)",
+      "Bash(npm start)",
+      "Bash(pkill -f \"electron\")",
+      "Bash(set:*)",
+      "Bash(set ELECTRON_CACHE=C:tempelectron:*)",
+      "Bash(npx asar:*)",
+      "Bash(ls:*)",
+      "Bash(du:*)",
+      "Bash(tree:*)",
+      "Bash(done)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(unzip:*)",
+      "Bash(cmd /c:*)",
+      "Bash(./downloads/ffmpeg-master-latest-win64-lgpl-shared/bin/ffmpeg.exe:*)"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+node_modules
+out
+dist
+gist
+*.
+.DS_Store
+.vscode
+/exports
+venv
+animalese-listener
+animalese-listener-arm64
+animalese-listenerx64
+animalese-listener.exe
+/.idea
